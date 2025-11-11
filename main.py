@@ -22,13 +22,16 @@ async def get_config() -> Dict[str, str]:
 
 async def get_token() -> str:
     data = get_config()
-    response = httpx.post(AUTH_ENDPOINT, data=data, timeout=30.0)
-    return response.json()['token']
+    async with httpx.AsyncClient() as client:
+        response = await client.post(AUTH_ENDPOINT, data=data, timeout=30.0)
+        response.raise_for_status()
+        return response.json()['token']
 
 
 async def get_headers() -> Dict[str, str]:
+    token = await get_token()
     return {
-        "Authorization": f"JWT {get_token()}"
+        "Authorization": f"JWT {token}"
     }
 
 
@@ -37,7 +40,7 @@ async def make_request(url: str, country_code: str, start_date: str) -> str:
         "country_code": country_code,
         "start_date": start_date
     }
-    headers = get_headers()
+    headers = await get_headers()
 
     async with httpx.AsyncClient() as client:
         try:
@@ -58,7 +61,7 @@ async def make_request(url: str, country_code: str, start_date: str) -> str:
 async def get_market_price_facts(country_code: str, start_date: str) -> str:
 
     url = f"{API_BASE_URL}/marketpricefacts"
-    return make_request(url, country_code, start_date)
+    return await make_request(url=url, country_code=country_code, start_date=start_date)
 
 
 @mcp.tool(
@@ -68,7 +71,7 @@ async def get_market_price_facts(country_code: str, start_date: str) -> str:
 async def get_cross_border_trade(country_code: str, start_date: str) -> str:
 
     url = f"{API_BASE_URL}/tradeflowquantityvalue"
-    return make_request(url, country_code, start_date)
+    return await make_request(url=url, country_code=country_code, start_date=start_date)
 
 
 @mcp.tool(
@@ -78,7 +81,7 @@ async def get_cross_border_trade(country_code: str, start_date: str) -> str:
 async def get_fews_net_food_security_classification(country_code: str, start_date: str) -> str:
 
     url = f"{API_BASE_URL}/ipcclassification"
-    return make_request(url, country_code, start_date)
+    return await make_request(url=url, country_code=country_code, start_date=start_date)
 
 
 @mcp.tool(
@@ -88,7 +91,7 @@ async def get_fews_net_food_security_classification(country_code: str, start_dat
 async def get_food_insecure_population_estimates(country_code: str, start_date: str) -> str:
 
     url = f"{API_BASE_URL}/ipcpopulation"
-    return make_request(url, country_code, start_date)
+    return await make_request(url=url, country_code=country_code, start_date=start_date)
 
 
 def main():
