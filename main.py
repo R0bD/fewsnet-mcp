@@ -6,7 +6,7 @@ import json
 import logging
 
 # Initialise FastMCP Server
-mcp = FastMCP("acled")
+mcp = FastMCP("fewsnet")
 
 # constants
 API_BASE_URL = 'https://fdw.fews.net/api'
