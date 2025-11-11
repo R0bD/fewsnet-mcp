@@ -11,23 +11,22 @@ mcp = FastMCP("fewsnet")
 # constants
 API_BASE_URL = 'https://fdw.fews.net/api'
 AUTH_ENDPOINT = 'https://fdw.fews.net/api-token-auth/'
-TOKEN = None
 
 
-def get_config() -> Dict[str, str]:
+async def get_config() -> Dict[str, str]:
     return {
         "username": os.environ.get("username", ""),
         "password": os.environ.get("password", "")
     }
 
 
-def get_token() -> str:
+async def get_token() -> str:
     data = get_config()
     response = httpx.post(AUTH_ENDPOINT, data=data, timeout=30.0)
     return response.json()['token']
 
 
-def get_headers() -> Dict[str, str]:
+async def get_headers() -> Dict[str, str]:
     return {
         "Authorization": f"JWT {get_token()}"
     }
