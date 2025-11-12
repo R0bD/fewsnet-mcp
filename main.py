@@ -22,10 +22,9 @@ def get_config() -> Dict[str, str]:
 
 def get_token() -> str:
     data = get_config()
-    with httpx.AsyncClient() as client:
-        response = client.post(AUTH_ENDPOINT, data=data, timeout=30.0)
-        response.raise_for_status()
-        return response.json()['token']
+    response = httpx.post(AUTH_ENDPOINT, data=data, timeout=30.0)
+    response.raise_for_status()
+    return response.json()['token']
 
 
 def get_headers() -> Dict[str, str]:
@@ -42,16 +41,16 @@ def make_request(url: str, country_code: str, start_date: str) -> str:
     }
     headers = get_headers()
 
-    with httpx.AsyncClient() as client:
-        try:
-            response = client.get(url, params=params, headers=headers, timeout=30.0)
-            response.raise_for_status()
-            logging.debug(response.json())
-            text = response.text
-            logging.info(text)
-            return text
-        except Exception:
-            return json.dumps({"error": "request failed"})
+    
+    try:
+        response = httpx.get(url, params=params, headers=headers, timeout=30.0)
+        response.raise_for_status()
+        logging.debug(response.json())
+        text = response.text
+        logging.info(text)
+        return text
+    except Exception:
+        return json.dumps({"error": "request failed"})
 
 
 @mcp.tool(
